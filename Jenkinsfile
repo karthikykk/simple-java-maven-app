@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven 3.x' // Match this name with what you configured in Jenkins -> Global Tool Configuration
+        maven 'Maven 3.x' // Ensure this matches your Jenkins Maven configuration name
     }
 
     environment {
@@ -27,4 +27,22 @@ pipeline {
         stage('Upload to S3') {
             steps {
                 script {
-                    def timestamp = sh(scr
+                    def timestamp = sh(script: "date +%Y%m%d%H%M%S", returnStdout: true).trim()
+                    def artifactPath = "target/my-app-1.0-SNAPSHOT.jar"
+
+                    echo "Uploading build artifact to S3 as build_${timestamp}.jar..."
+                    sh "aws s3 cp ${artifactPath} s3://${S3_BUCKET}/builds/build_${timestamp}.jar"
+                }
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo 'Build or upload failed.'
+        }
+        success {
+            echo 'Build and upload completed successfully.'
+        }
+    }
+}
