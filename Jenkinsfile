@@ -2,17 +2,18 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven 3.x' // Ensure this matches your Jenkins Maven configuration name
+        maven 'M3' // This must match the name set in Jenkins Global Tool Configuration
     }
 
     environment {
-        S3_BUCKET = 'jenkins-artifacts-123456789'
+        AWS_DEFAULT_REGION = 'us-east-1' // Replace with your region
+        BUCKET_NAME = 'jenkins-artifacts-123456789'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                echo 'Checking out code from GitHub...'
+                echo 'Checking out the code from GitHub...'
                 git 'https://github.com/karthikykk/simple-java-maven-app.git'
             }
         }
@@ -24,25 +25,33 @@ pipeline {
             }
         }
 
+        stage('List Files') {
+            steps {
+                echo 'Listing files in target directory...'
+                sh 'ls -lh target'
+            }
+        }
+
         stage('Upload to S3') {
             steps {
                 script {
                     def timestamp = sh(script: "date +%Y%m%d%H%M%S", returnStdout: true).trim()
-                    def artifactPath = "target/my-app-1.0-SNAPSHOT.jar"
+                    def filePath = "target/my-app-1.0-SNAPSHOT.jar"
+                    def s3Key = "builds/build_${timestamp}.jar"
 
-                    echo "Uploading build artifact to S3 as build_${timestamp}.jar..."
-                    sh "aws s3 cp ${artifactPath} s3://${S3_BUCKET}/builds/build_${timestamp}.jar"
+                    echo "Uploading ${filePath} to s3://${env.BUCKET_NAME}/${s3Key} ..."
+                    sh "aws s3 cp ${filePath} s3://${env.BUCKET_NAME}/${s3Key}"
                 }
             }
         }
     }
 
     post {
+        success {
+            echo 'Build and upload succeeded!'
+        }
         failure {
             echo 'Build or upload failed.'
-        }
-        success {
-            echo 'Build and upload completed successfully.'
         }
     }
 }
