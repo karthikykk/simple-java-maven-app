@@ -63,4 +63,28 @@ pipeline {
                     echo "Post-build step for environment: ${params.DEPLOY_ENV}"
 
                     if (params.DEPLOY_ENV == 'prod') {
+                        echo "You selected production. Deploy to PROD cluster."
+                        // TODO: Add real production deployment logic here
+                    } else if (params.DEPLOY_ENV == 'test') {
+                        echo "You selected test. Deploy to TEST cluster."
+                        // TODO: Add real test deployment logic here
+                    } else {
+                        echo "You selected dev. Deploy to DEV cluster."
+                        // TODO: Add real dev deployment logic here
+                    }
+                }
+            }
+        }
+    }
+
+    // Post build actions
+    post {
+        success {
+            echo "Build and deployment completed successfully!"
+        }
+        failure {
+            echo "Build or deployment failed!"
+        }
+    }
+}
 
