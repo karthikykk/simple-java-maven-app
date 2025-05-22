@@ -1,18 +1,21 @@
 pipeline {
     agent any
 
+    // Add Maven tool defined in Jenkins Global Tool Configuration
+    tools {
+        maven 'Maven 3.9.6' // Match the name you set in Jenkins -> Global Tool Configuration
+    }
+
     // Define input parameter
     parameters {
         string(name: 'DEPLOY_ENV', defaultValue: 'dev', description: 'Deployment environment (e.g., dev, test, prod)')
     }
 
     environment {
-        // Optional: define environment variables if needed
         MAVEN_OPTS = "-Xms256m -Xmx512m"
     }
 
     stages {
-
         stage('Initialize') {
             steps {
                 echo "Pipeline started for environment: ${params.DEPLOY_ENV}"
@@ -21,7 +24,6 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                // Clone source code from Git
                 git branch: 'master',
                     url: 'https://github.com/karthikykk/simple-java-maven-app.git'
             }
@@ -38,15 +40,16 @@ pipeline {
             steps {
                 script {
                     echo "Post-build step for environment: ${params.DEPLOY_ENV}"
+
                     if (params.DEPLOY_ENV == 'prod') {
                         echo "You selected production. Deploy to PROD cluster."
-                        // Place production deploy logic here
+                        // TODO: Add real production deployment logic
                     } else if (params.DEPLOY_ENV == 'test') {
                         echo "Test environment selected. Deploying to TEST environment..."
-                        // Place test deploy logic here
+                        // TODO: Add real test deployment logic
                     } else {
-                        echo "Default or dev environment. Deploying to DEV..."
-                        // Place dev deploy logic here
+                        echo "Non-prod/test environment. Deploying to DEV environment..."
+                        // TODO: Add real dev deployment logic
                     }
                 }
             }
@@ -55,7 +58,7 @@ pipeline {
 
     post {
         success {
-            echo "Build and steps completed successfully for ${params.DEPLOY_ENV}"
+            echo "Pipeline completed successfully for ${params.DEPLOY_ENV}"
         }
         failure {
             echo "Build failed for ${params.DEPLOY_ENV}"
