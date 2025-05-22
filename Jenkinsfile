@@ -3,7 +3,7 @@ pipeline {
 
     // Add Maven tool defined in Jenkins Global Tool Configuration
     tools {
-        maven 'Maven 3.9.6' // Match the name you set in Jenkins -> Global Tool Configuration
+         maven 'M3'  // This should match the name you configured in Global Tool Configuration
     }
 
     // Define input parameter
